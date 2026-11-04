@@ -12,6 +12,10 @@
     "sync:inbox": "node --env-file=.env index.js --sync-inbox",
     "dashboard": "node --env-file=.env dashboard.js",
     "dev": "node --env-file=.env dashboard.js",
+    "hunt:restaurants": "node --env-file=.env seranex_restaurant_engine.js",
+    "hunt:restaurants:dry": "node --env-file=.env seranex_restaurant_engine.js --dry-run",
+    "bot:restaurants": "node --env-file=.env seranex_restaurant_bot.js",
+    "cards:outreach": "node --env-file=.env wtm_card_outreach.js",
     "postinstall": "node scripts/patch-wwebjs.js"
   },
   "engines": {

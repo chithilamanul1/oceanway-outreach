@@ -1,22 +1,32 @@
 version: '3.8'
 
 services:
-  oceanway-rate-hunter:
+  oceanway-outreach:
     build:
       context: .
       dockerfile: Dockerfile
-    container_name: oceanway-rate-hunter
+    container_name: oceanway-outreach
     restart: unless-stopped
     ports:
       - "3000:3000"
     env_file:
       - .env
+    environment:
+      - NODE_ENV=production
+      - PORT=3000
+      - PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium
+      - PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true
     volumes:
-      # Persistent storage for downloaded rate sheets
-      - ./rate_sheets:/app/rate_sheets
-      # Persistent storage for WhatsApp session authentication
-      - ./.wwebjs_auth:/app/.wwebjs_auth
-      # Persistent databases
+      # Persist WhatsApp Web session across restarts
+      - wa_auth:/app/.wwebjs_auth
+      # Persist downloaded rate sheets
+      - rate_sheets_data:/app/rate_sheets
+      # Persist databases
       - ./hotels_db.json:/app/hotels_db.json
       - ./master_costing_sheet.json:/app/master_costing_sheet.json
       - ./seen_hotels.json:/app/seen_hotels.json
+      - ./worker_state.json:/app/worker_state.json
+
+volumes:
+  wa_auth:
+  rate_sheets_data:

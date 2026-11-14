@@ -1,0 +1,10 @@
+{
+  "startedAt": "2026-11-14T08:34:01.348Z",
+  "cycleCount": 2,
+  "totalInquiriesSent": 20,
+  "totalHotelsDiscovered": 40,
+  "currentRegionIndex": 2,
+  "lastActiveAt": "2026-11-14T08:51:26.254Z",
+  "isRunning": true,
+  "currentRegionName": "Kandalama"
+}

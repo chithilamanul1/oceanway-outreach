@@ -82,6 +82,10 @@ function cleanEmail(rawEmail) {
 
   if (!localPart || !domain || !domain.includes(".")) return null;
 
+  // Filter out dummy/sample placeholder emails
+  const dummyLocals = ["sample", "example", "test", "demo", "user", "yourname", "your-email", "name", "email", "placeholder", "username"];
+  if (dummyLocals.includes(localPart)) return null;
+
   // Trim glued words after domain (e.g. tabularasaresort.comaboutcontact -> tabularasaresort.com)
   domain = trimDomainToValidTld(domain);
   if (!domain || domain.length < 4) return null;
@@ -147,6 +151,26 @@ function extractEmailsFromHtml(html, baseUrl) {
     const cleaned = cleanEmail(raw);
     if (cleaned) found.add(cleaned);
   });
+
+  // 2. Check JSON-LD structured data (Hotels frequently put official reservation email in schema.org)
+  $('script[type="application/ld+json"]').each((_, el) => {
+    try {
+      const rawText = $(el).html() || "";
+      const json = JSON.parse(rawText);
+      const searchObj = (obj) => {
+        if (!obj || typeof obj !== "object") return;
+        if (typeof obj.email === "string") {
+          const cleaned = cleanEmail(obj.email);
+          if (cleaned) found.add(cleaned);
+        }
+        for (const k of Object.keys(obj)) searchObj(obj[k]);
+      };
+      searchObj(json);
+    } catch {}
+  });
+
+  // Strip input, script, style elements to avoid placeholder and JS false positives
+  $('script, style, input, textarea, select, noscript').remove();
 
   // 2. Strict regex search bounded by valid TLDs
   const emailRegex = /[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.(?:com\.lk|org\.lk|hotel\.lk|lk|com|org|net|co|travel|hotel|info|io|biz|ca|uk|de|fr|au|in|asia|[a-z]{2,5})\b/gi;

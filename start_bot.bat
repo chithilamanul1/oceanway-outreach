@@ -1,6 +1,6 @@
 @echo off
-cd /d "d:\desktop\Outreach"
-title Outreach & Automation Suite
+cd /d "%~dp0"
+title Ocean Way Tours Hotel Rate Hunter
 
-:: Start the Master Dashboard, IMAP Harvester & WhatsApp Delivery
+:: Start the Ocean Way Tours Master Dashboard & Background Harvester
 node --env-file=.env dashboard.js

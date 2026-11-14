@@ -10,6 +10,9 @@ for /f "tokens=5" %%a in ('netstat -aon ^| findstr :3000 ^| findstr LISTENING') 
     taskkill /F /PID %%a >nul 2>&1
 )
 
+:: Terminate any running worker scripts
+wmic process where "name='node.exe' and (commandline like '%%islandwide%%' or commandline like '%%dashboard.js%%')" call terminate >nul 2>&1
+
 echo.
 echo Process stopped successfully.
 timeout /t 3 >nul

@@ -69,21 +69,106 @@
       </div>
 
       <div class="flex flex-wrap items-center gap-3">
-        <a href="/api/costing-sheet/download" class="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2.5 rounded-xl font-medium text-sm flex items-center gap-2 shadow-sm transition">
-          <i class="fa-solid fa-file-excel"></i> Download Master Excel (.xlsx)
+        <a href="/api/costing-sheet/17pax/download" class="bg-emerald-700 hover:bg-emerald-800 text-white px-3.5 py-2.5 rounded-xl font-medium text-xs flex items-center gap-2 shadow-sm transition">
+          <i class="fa-solid fa-file-excel"></i> 17-Pax Costing (.xlsx)
         </a>
 
-        <button onclick="connectWhatsApp()" id="btn-wa-connect" class="bg-green-50 hover:bg-green-100 text-green-700 px-4 py-2.5 rounded-xl font-medium text-sm flex items-center gap-2 border border-green-200 transition shadow-sm">
-          <i class="fa-brands fa-whatsapp text-lg text-green-600"></i> Link WhatsApp (For Instant Delivery)
+        <a href="/api/costing-sheet/download" class="bg-blue-600 hover:bg-blue-700 text-white px-3.5 py-2.5 rounded-xl font-medium text-xs flex items-center gap-2 shadow-sm transition">
+          <i class="fa-solid fa-file-csv"></i> Dynamic Master (.xlsx)
+        </a>
+
+        <a href="/api/business-registration/download" class="bg-slate-700 hover:bg-slate-800 text-white px-3.5 py-2.5 rounded-xl font-medium text-xs flex items-center gap-2 shadow-sm transition">
+          <i class="fa-solid fa-certificate text-amber-400"></i> Business Reg (PV 00380121)
+        </a>
+
+        <button onclick="openWhatsAppModal()" id="btn-wa-connect" class="bg-green-50 hover:bg-green-100 text-green-700 px-3.5 py-2.5 rounded-xl font-medium text-xs flex items-center gap-2 border border-green-200 transition shadow-sm">
+          <i class="fa-brands fa-whatsapp text-base text-green-600"></i> <span id="wa-header-btn-text">WhatsApp Manager</span>
         </button>
 
-        <button onclick="openRateSheetFolder()" class="bg-slate-100 hover:bg-slate-200 text-slate-700 px-4 py-2.5 rounded-xl font-medium text-sm flex items-center gap-2 border border-slate-300 transition shadow-sm">
-          <i class="fa-solid fa-folder-open text-amber-500"></i> Rate Folders
+        <button onclick="openRateSheetFolder()" class="bg-slate-100 hover:bg-slate-200 text-slate-700 px-3 py-2.5 rounded-xl font-medium text-xs flex items-center gap-2 border border-slate-300 transition shadow-sm">
+          <i class="fa-solid fa-folder-open text-amber-500"></i> Folders
         </button>
 
-        <button onclick="syncInbox()" id="btn-sync-inbox" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2.5 rounded-xl font-medium text-sm flex items-center gap-2 shadow-sm transition">
+        <button onclick="syncInbox()" id="btn-sync-inbox" class="bg-indigo-600 hover:bg-indigo-700 text-white px-3.5 py-2.5 rounded-xl font-medium text-xs flex items-center gap-2 shadow-sm transition">
           <i class="fa-solid fa-inbox"></i> Sync Inbox
         </button>
+      </div>
+    </div>
+
+    <!-- AUTONOMOUS CONTINUOUS 100/HR ISLAND-WIDE RATE HUNTER CONTROL -->
+    <div class="bg-gradient-to-r from-slate-900 via-slate-800 to-indigo-950 text-white rounded-2xl p-6 shadow-md border border-slate-700">
+      <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-4 border-b border-slate-700/60">
+        <div>
+          <div class="flex items-center gap-2.5">
+            <span class="relative flex h-3 w-3">
+              <span id="worker-pulse-dot" class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+              <span id="worker-static-dot" class="relative inline-flex rounded-full h-3 w-3 bg-emerald-500"></span>
+            </span>
+            <h2 class="text-lg font-bold text-white tracking-wide">Continuous Island-Wide Rate Hunter (100/hr Non-Stop)</h2>
+            <span id="worker-status-badge" class="bg-emerald-500/20 text-emerald-300 text-xs font-semibold px-2.5 py-0.5 rounded-full border border-emerald-500/30">
+              RUNNING 24/7
+            </span>
+          </div>
+          <p class="text-xs text-slate-400 mt-1">
+            Autonomous procurement covering 65+ tourist destinations across all 9 provinces • Auto-attaches Certificate of Incorporation (PV 00380121) • Instant WhatsApp sync
+          </p>
+        </div>
+
+        <div class="flex items-center gap-3">
+          <button id="btn-toggle-worker" onclick="toggleContinuousWorker()" class="bg-rose-600 hover:bg-rose-700 text-white text-xs font-semibold px-4 py-2.5 rounded-xl shadow transition flex items-center gap-2">
+            <i class="fa-solid fa-pause"></i> <span>Pause Worker</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- WORKER REAL-TIME METRICS & ISLAND COVERAGE -->
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mt-5 text-xs">
+        <div class="bg-slate-800/80 border border-slate-700/80 p-3.5 rounded-xl">
+          <span class="text-slate-400 uppercase text-[10px] tracking-wider block">Active Destination</span>
+          <div class="text-base font-bold text-amber-300 mt-1 flex items-center gap-1.5">
+            <i class="fa-solid fa-map-pin text-rose-400 text-xs"></i>
+            <span id="worker-region-name">Kurunegala</span>
+          </div>
+          <span class="text-[11px] text-slate-400 mt-0.5 block">Region <span id="worker-region-idx">9</span> of 65 in Sri Lanka</span>
+        </div>
+
+        <div class="bg-slate-800/80 border border-slate-700/80 p-3.5 rounded-xl">
+          <span class="text-slate-400 uppercase text-[10px] tracking-wider block">Inquiries Dispatched</span>
+          <div class="text-base font-bold text-emerald-400 mt-1 flex items-center gap-1.5">
+            <i class="fa-solid fa-paper-plane text-emerald-400 text-xs"></i>
+            <span id="worker-sent-count">0</span> Sent
+          </div>
+          <span class="text-[11px] text-slate-400 mt-0.5 block">BR PV 00380121 attached</span>
+        </div>
+
+        <div class="bg-slate-800/80 border border-slate-700/80 p-3.5 rounded-xl">
+          <span class="text-slate-400 uppercase text-[10px] tracking-wider block">Island Sweep Cycle</span>
+          <div class="text-base font-bold text-blue-300 mt-1 flex items-center gap-1.5">
+            <i class="fa-solid fa-rotate text-blue-400 text-xs"></i>
+            <span id="worker-cycle">Cycle #1</span>
+          </div>
+          <span class="text-[11px] text-slate-400 mt-0.5 block">Never stops ("24/7 autonomous")</span>
+        </div>
+
+        <div class="bg-slate-800/80 border border-slate-700/80 p-3.5 rounded-xl">
+          <span class="text-slate-400 uppercase text-[10px] tracking-wider block">Pacing Rate</span>
+          <div class="text-base font-bold text-purple-300 mt-1 flex items-center gap-1.5">
+            <i class="fa-solid fa-gauge-high text-purple-400 text-xs"></i>
+            <span>~100 Hotels / Hr</span>
+          </div>
+          <span class="text-[11px] text-slate-400 mt-0.5 block">36-second safe Hostinger spacing</span>
+        </div>
+      </div>
+
+      <!-- PROGRESS BAR -->
+      <div class="mt-4">
+        <div class="flex justify-between text-[11px] text-slate-400 mb-1">
+          <span>Island-Wide Sweep Progress</span>
+          <span id="worker-progress-pct">14% Complete</span>
+        </div>
+        <div class="w-full bg-slate-800 rounded-full h-2 overflow-hidden border border-slate-700">
+          <div id="worker-progress-bar" class="bg-gradient-to-r from-blue-500 to-emerald-400 h-2 rounded-full transition-all duration-500" style="width: 14%"></div>
+        </div>
       </div>
     </div>
 
@@ -339,6 +424,96 @@
         </div>
       </div>
 
+    </div>
+  </div>
+
+  <!-- WHATSAPP CONNECTION & PAIRING MODAL -->
+  <div id="modal-whatsapp" class="hidden fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4">
+    <div class="bg-white rounded-3xl max-w-lg w-full p-6 shadow-2xl border border-slate-200 relative animate-in fade-in zoom-in duration-200">
+      <button onclick="closeWhatsAppModal()" class="absolute top-5 right-5 text-slate-400 hover:text-slate-600 w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center">
+        <i class="fa-solid fa-xmark text-sm"></i>
+      </button>
+
+      <div class="flex items-center gap-3 pb-4 border-b border-slate-100">
+        <div class="w-12 h-12 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center text-2xl">
+          <i class="fa-brands fa-whatsapp"></i>
+        </div>
+        <div>
+          <h3 class="text-lg font-bold text-slate-900">WhatsApp Automation Hub</h3>
+          <p class="text-xs text-slate-500">Autonomous Rate Sheet Forwarder to +94 71 177 0186</p>
+        </div>
+      </div>
+
+      <div class="mt-4 space-y-4">
+        <!-- Status Banner -->
+        <div class="p-3.5 rounded-2xl bg-slate-50 border border-slate-200 flex items-center justify-between">
+          <div class="flex items-center gap-2">
+            <span id="wa-modal-dot" class="w-2.5 h-2.5 rounded-full bg-slate-400"></span>
+            <span class="text-xs font-semibold text-slate-700">Connection Status:</span>
+          </div>
+          <span id="wa-modal-status-text" class="text-xs font-bold px-2.5 py-0.5 rounded-full bg-slate-200 text-slate-700">
+            Checking...
+          </span>
+        </div>
+
+        <!-- TWO PAIRING METHODS TABS -->
+        <div class="grid grid-cols-2 gap-2 p-1 bg-slate-100 rounded-xl text-xs font-semibold">
+          <button id="wa-tab-btn-qr" onclick="switchWaTab('qr')" class="py-2 rounded-lg bg-white shadow-sm text-slate-800">
+            <i class="fa-solid fa-qrcode mr-1"></i> Scan QR Code
+          </button>
+          <button id="wa-tab-btn-phone" onclick="switchWaTab('phone')" class="py-2 rounded-lg text-slate-500 hover:text-slate-800">
+            <i class="fa-solid fa-mobile-screen-button mr-1"></i> Phone Pairing Code
+          </button>
+        </div>
+
+        <!-- TAB CONTENT: QR CODE -->
+        <div id="wa-tab-qr" class="text-center py-2 space-y-3">
+          <div class="inline-block p-3 bg-white border border-slate-200 rounded-2xl shadow-sm">
+            <img id="wa-qr-image" src="/whatsapp_qr.png" alt="WhatsApp QR Code" class="w-56 h-56 mx-auto object-contain rounded-lg" onerror="this.src='https://placehold.co/220x220?text=Generating+QR...'" />
+          </div>
+          <p class="text-xs text-slate-500">
+            Open WhatsApp on phone → <b>Linked Devices</b> → <b>Link a Device</b> → Scan this QR.
+          </p>
+          <button onclick="refreshWaQR()" class="text-xs text-blue-600 hover:text-blue-700 font-medium inline-flex items-center gap-1">
+            <i class="fa-solid fa-rotate-right"></i> Refresh QR Image
+          </button>
+        </div>
+
+        <!-- TAB CONTENT: PHONE PAIRING CODE -->
+        <div id="wa-tab-phone" class="hidden space-y-3 py-2">
+          <p class="text-xs text-slate-600">
+            Link WhatsApp without scanning QR! Enter the phone number to receive an 8-character pairing code:
+          </p>
+          <div class="space-y-1.5">
+            <label class="text-[11px] font-semibold text-slate-500 uppercase">Sender Phone Number</label>
+            <div class="flex gap-2">
+              <input type="text" id="wa-pairing-phone" value="0760602638" class="flex-1 bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 text-xs font-mono text-slate-800 focus:outline-none focus:ring-2 focus:ring-emerald-500">
+              <button onclick="requestPairingCode()" id="btn-get-pairing-code" class="bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold px-4 py-2 rounded-xl shadow transition">
+                Get Code
+              </button>
+            </div>
+          </div>
+
+          <div id="wa-pairing-code-container" class="hidden p-4 bg-emerald-50 border border-emerald-200 rounded-2xl text-center space-y-2">
+            <span class="text-[11px] font-semibold text-emerald-800 uppercase block">Your 8-Digit Pairing Code:</span>
+            <div id="wa-pairing-code-display" class="font-mono text-2xl font-bold tracking-widest text-emerald-700 select-all">
+              ---- ----
+            </div>
+            <p class="text-[11px] text-emerald-600">
+              Open WhatsApp on your phone → <b>Linked Devices</b> → <b>Link with phone number instead</b> → enter this code.
+            </p>
+          </div>
+        </div>
+
+        <!-- Routing Information Note -->
+        <div class="p-3 bg-blue-50/70 border border-blue-100 rounded-xl text-[11px] text-blue-800 flex items-start gap-2">
+          <i class="fa-solid fa-circle-info text-blue-600 mt-0.5"></i>
+          <div>
+            <b>Automated Rate Sheet Delivery:</b> Any hotel reply containing a rate sheet (PDF / Excel) is instantly analyzed and forwarded directly to WhatsApp number <b>+94 71 177 0186</b>.
+          </div>
+        </div>
+
+      </div>
     </div>
   </div>
 
@@ -660,17 +835,166 @@
     }
 
     async function connectWhatsApp() {
+      openWhatsAppModal();
+    }
+
+    // ─── CONTINUOUS 100/HR WORKER CONTROL ─────────────────────────────────────
+    let isWorkerCurrentlyRunning = false;
+
+    async function pollWorkerState() {
       try {
-        const res = await fetch('/api/whatsapp/connect', { method: 'POST' });
-        alert('WhatsApp connection initiated! Check your terminal if a QR code is generated.');
+        const res = await fetch('/api/worker/state');
+        if (!res.ok) return;
+        const data = await res.json();
+
+        isWorkerCurrentlyRunning = Boolean(data.isRunning);
+        const regionName = data.currentRegionName || 'Sigiriya';
+        const regionIdx = (data.currentRegionIndex || 0) + 1;
+        const totalRegions = data.totalRegions || 65;
+        const inquiriesSent = data.totalInquiriesSent || 0;
+        const cycle = data.cycleCount || 1;
+
+        document.getElementById('worker-region-name').innerText = regionName;
+        document.getElementById('worker-region-idx').innerText = regionIdx;
+        document.getElementById('worker-sent-count').innerText = inquiriesSent;
+        document.getElementById('worker-cycle').innerText = `Cycle #${cycle}`;
+
+        const pct = Math.min(100, Math.round((regionIdx / totalRegions) * 100));
+        document.getElementById('worker-progress-pct').innerText = `${pct}% Complete (${regionIdx}/${totalRegions} destinations)`;
+        document.getElementById('worker-progress-bar').style.width = `${pct}%`;
+
+        const badge = document.getElementById('worker-status-badge');
+        const pulse = document.getElementById('worker-pulse-dot');
+        const dot = document.getElementById('worker-static-dot');
+        const btn = document.getElementById('btn-toggle-worker');
+
+        if (isWorkerCurrentlyRunning) {
+          badge.className = 'bg-emerald-500/20 text-emerald-300 text-xs font-semibold px-2.5 py-0.5 rounded-full border border-emerald-500/30';
+          badge.innerText = 'RUNNING 24/7';
+          pulse.className = 'animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75';
+          dot.className = 'relative inline-flex rounded-full h-3 w-3 bg-emerald-500';
+          btn.className = 'bg-rose-600 hover:bg-rose-700 text-white text-xs font-semibold px-4 py-2.5 rounded-xl shadow transition flex items-center gap-2';
+          btn.innerHTML = '<i class="fa-solid fa-pause"></i> <span>Pause Worker</span>';
+        } else {
+          badge.className = 'bg-amber-500/20 text-amber-300 text-xs font-semibold px-2.5 py-0.5 rounded-full border border-amber-500/30';
+          badge.innerText = 'PAUSED';
+          pulse.className = 'hidden';
+          dot.className = 'relative inline-flex rounded-full h-3 w-3 bg-amber-500';
+          btn.className = 'bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold px-4 py-2.5 rounded-xl shadow transition flex items-center gap-2';
+          btn.innerHTML = '<i class="fa-solid fa-play"></i> <span>Resume 100/hr Worker</span>';
+        }
       } catch (err) {
-        alert('WhatsApp connect error: ' + err.message);
+        console.warn('Worker poll error:', err);
       }
     }
 
-    // Initial load
+    async function toggleContinuousWorker() {
+      const endpoint = isWorkerCurrentlyRunning ? '/api/worker/stop' : '/api/worker/start';
+      try {
+        const res = await fetch(endpoint, { method: 'POST' });
+        const data = await res.json();
+        alert(data.message || 'Worker updated.');
+        await pollWorkerState();
+      } catch (err) {
+        alert('Failed to toggle worker: ' + err.message);
+      }
+    }
+
+    // ─── WHATSAPP MODAL & PAIRING CODE ────────────────────────────────────────
+    function openWhatsAppModal() {
+      document.getElementById('modal-whatsapp').classList.remove('hidden');
+      loadWhatsAppStatus();
+    }
+
+    function closeWhatsAppModal() {
+      document.getElementById('modal-whatsapp').classList.add('hidden');
+    }
+
+    function switchWaTab(tab) {
+      const isQr = tab === 'qr';
+      document.getElementById('wa-tab-qr').classList.toggle('hidden', !isQr);
+      document.getElementById('wa-tab-phone').classList.toggle('hidden', isQr);
+      document.getElementById('wa-tab-btn-qr').className = isQr
+        ? 'py-2 rounded-lg bg-white shadow-sm text-slate-800'
+        : 'py-2 rounded-lg text-slate-500 hover:text-slate-800';
+      document.getElementById('wa-tab-btn-phone').className = !isQr
+        ? 'py-2 rounded-lg bg-white shadow-sm text-slate-800'
+        : 'py-2 rounded-lg text-slate-500 hover:text-slate-800';
+    }
+
+    function refreshWaQR() {
+      const img = document.getElementById('wa-qr-image');
+      img.src = '/whatsapp_qr.png?t=' + Date.now();
+    }
+
+    async function loadWhatsAppStatus() {
+      try {
+        const res = await fetch('/api/whatsapp/status');
+        const data = await res.json();
+        const dot = document.getElementById('wa-modal-dot');
+        const statusText = document.getElementById('wa-modal-status-text');
+        const headerBtnText = document.getElementById('wa-header-btn-text');
+
+        if (data.isReady) {
+          dot.className = 'w-2.5 h-2.5 rounded-full bg-emerald-500';
+          statusText.className = 'text-xs font-bold px-2.5 py-0.5 rounded-full bg-emerald-100 text-emerald-800';
+          statusText.innerText = 'Connected & Active';
+          headerBtnText.innerText = 'WhatsApp Connected ✓';
+        } else if (data.hasQR) {
+          dot.className = 'w-2.5 h-2.5 rounded-full bg-amber-500 animate-pulse';
+          statusText.className = 'text-xs font-bold px-2.5 py-0.5 rounded-full bg-amber-100 text-amber-800';
+          statusText.innerText = 'QR Code Scan Required';
+          headerBtnText.innerText = 'Scan WhatsApp QR';
+          refreshWaQR();
+        } else {
+          dot.className = 'w-2.5 h-2.5 rounded-full bg-blue-500';
+          statusText.className = 'text-xs font-bold px-2.5 py-0.5 rounded-full bg-blue-100 text-blue-800';
+          statusText.innerText = 'Initializing Client...';
+          headerBtnText.innerText = 'WhatsApp Initializing';
+        }
+      } catch (err) {
+        console.warn('WhatsApp status error:', err);
+      }
+    }
+
+    async function requestPairingCode() {
+      const phoneInput = document.getElementById('wa-pairing-phone');
+      const phone = phoneInput.value.trim() || '0760602638';
+      const btn = document.getElementById('btn-get-pairing-code');
+      const original = btn.innerText;
+
+      btn.innerText = 'Requesting...';
+      btn.disabled = true;
+
+      try {
+        const res = await fetch('/api/whatsapp/pairing-code', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ phone })
+        });
+        const data = await res.json();
+
+        if (data.success && data.pairingCode) {
+          document.getElementById('wa-pairing-code-container').classList.remove('hidden');
+          document.getElementById('wa-pairing-code-display').innerText = data.pairingCode;
+        } else {
+          alert('Pairing Code error: ' + (data.error || 'Check console'));
+        }
+      } catch (err) {
+        alert('Pairing Code request failed: ' + err.message);
+      } finally {
+        btn.innerText = original;
+        btn.disabled = false;
+      }
+    }
+
+    // Initial load & periodic polling
     loadData();
+    pollWorkerState();
+    loadWhatsAppStatus();
     setInterval(loadData, 20000);
+    setInterval(pollWorkerState, 3000);
+    setInterval(loadWhatsAppStatus, 8000);
   </script>
 </body>
 </html>

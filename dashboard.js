@@ -2,14 +2,28 @@ import express from 'express';
 import { join, dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import fs from 'node:fs/promises';
-import { existsSync, mkdirSync } from 'node:fs';
+import { existsSync, mkdirSync, readFileSync } from 'node:fs';
 import { exec } from 'node:child_process';
 import { harvestHotelsForCategory, loadHotelsDb, saveHotelsDb } from './index.js';
 import { syncRateSheetsFromInbox, saveRateSheetAttachment } from './inbox_harvester.js';
 import { sendRateSheetInquiry } from './email.js';
-import { initWhatsApp } from './whatsapp.js';
+import { initWhatsApp, getWhatsAppStatus, requestWhatsAppPairingCode } from './whatsapp.js';
 import { loadMasterCostingSheet, analyzeRateSheetDocument } from './rate_sheet_analyzer.js';
+import {
+  runContinuousHarvester,
+  startContinuousHarvester,
+  stopContinuousHarvester,
+  isContinuousHarvesterRunning,
+  EXPANDED_SRI_LANKA_REGIONS
+} from './islandwide_continuous_worker.js';
 import { setTimeout as sleep } from 'node:timers/promises';
+
+// Auto-load .env if running standalone outside Docker/Vercel
+if (existsSync('.env') && !process.env.VERCEL) {
+  try {
+    process.loadEnvFile('.env');
+  } catch {}
+}
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -51,6 +65,63 @@ app.get('/api/hotels', async (req, res) => {
 
 let isScanning = false;
 let scanStatus = { running: false, category: null, region: null, log: '' };
+
+app.get('/api/worker/state', (req, res) => {
+  try {
+    let data = {
+      isRunning: isContinuousHarvesterRunning(),
+      cycleCount: 0,
+      totalInquiriesSent: 0,
+      totalHotelsDiscovered: 0,
+      currentRegionIndex: 0,
+      currentRegionName: 'Sigiriya',
+      totalRegions: EXPANDED_SRI_LANKA_REGIONS.length,
+      pacingPerHour: 100,
+      pacingIntervalSec: 36
+    };
+
+    if (existsSync('worker_state.json')) {
+      const saved = JSON.parse(readFileSync('worker_state.json', 'utf8'));
+      data = {
+        ...data,
+        ...saved,
+        isRunning: isContinuousHarvesterRunning()
+      };
+      if (typeof data.currentRegionIndex === 'number' && EXPANDED_SRI_LANKA_REGIONS[data.currentRegionIndex]) {
+        data.currentRegionName = EXPANDED_SRI_LANKA_REGIONS[data.currentRegionIndex];
+      }
+    }
+    res.json(data);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.post('/api/worker/start', (req, res) => {
+  try {
+    const started = startContinuousHarvester();
+    res.json({
+      success: true,
+      running: true,
+      message: started ? 'Autonomous 100/hr continuous rate hunter started.' : 'Continuous worker is already running.'
+    });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.post('/api/worker/stop', (req, res) => {
+  try {
+    stopContinuousHarvester();
+    res.json({
+      success: true,
+      running: false,
+      message: 'Autonomous rate hunter stopping cleanly...'
+    });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
 
 app.get('/api/scan/status', (req, res) => {
   res.json(scanStatus);
@@ -113,13 +184,33 @@ app.get('/api/costing-sheet', (req, res) => {
   }
 });
 
-// Download Excel file directly
+// Download Excel file directly (Dynamic Master)
 app.get('/api/costing-sheet/download', (req, res) => {
   const filePath = resolve(__dirname, 'rate_sheets', 'Master_SriLanka_Hotel_Costing_Sheet.xlsx');
   if (existsSync(filePath)) {
     res.download(filePath, 'Master_SriLanka_Hotel_Costing_Sheet.xlsx');
   } else {
     res.status(404).json({ error: 'Excel file not generated yet. Analyze at least one rate sheet first.' });
+  }
+});
+
+// Download 17-Pax International Master Costing Sheet (7D, 10D, 12D Itineraries)
+app.get('/api/costing-sheet/17pax/download', (req, res) => {
+  const filePath = resolve(__dirname, 'costing_sheets', 'Oceanway_17Pax_International_Itineraries_Costing.xlsx');
+  if (existsSync(filePath)) {
+    res.download(filePath, 'Oceanway_17Pax_International_Itineraries_Costing.xlsx');
+  } else {
+    res.status(404).json({ error: '17-Pax Costing workbook not found.' });
+  }
+});
+
+// Download Oceanway Tours Business Registration Certificate (PV 00380121)
+app.get('/api/business-registration/download', (req, res) => {
+  const filePath = resolve(__dirname, 'assets', 'Oceanway_Tours_Business_Registration_PV00380121.pdf');
+  if (existsSync(filePath)) {
+    res.download(filePath, 'Oceanway_Tours_Business_Registration_PV00380121.pdf');
+  } else {
+    res.status(404).json({ error: 'Business Registration certificate not found.' });
   }
 });
 
@@ -153,6 +244,20 @@ app.post('/api/analyze-rate-sheet/:id', async (req, res) => {
 });
 
 // ─── API: CONNECT WHATSAPP FOR RATE SHEET DELIVERY ────────────────────────────
+
+app.get('/api/whatsapp/status', (req, res) => {
+  res.json(getWhatsAppStatus());
+});
+
+app.post('/api/whatsapp/pairing-code', async (req, res) => {
+  try {
+    const phone = req.body?.phone || process.env.ADMIN_WHATSAPP_NUMBER || "94711770186";
+    const pairingCode = await requestWhatsAppPairingCode(phone);
+    res.json({ success: true, phone, pairingCode });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
 
 app.post('/api/whatsapp/connect', async (req, res) => {
   try {
@@ -260,35 +365,44 @@ app.get('/api/open-folder', (req, res) => {
 });
 
 // ─── PERIODIC BACKGROUND INBOX MONITOR (EVERY 2 MINUTES) ──────────────────────
-const AUTO_SYNC_INTERVAL_MS = 2 * 60 * 1000;
-setInterval(async () => {
-  const user = process.env.IMAP_USER || process.env.SMTP_USER || process.env.EMAIL_USER;
-  if (user) {
-    console.log('⏰ Auto-polling inbox for newly replied rate sheets...');
-    await syncRateSheetsFromInbox().catch(() => {});
-  }
-}, AUTO_SYNC_INTERVAL_MS);
-
-// ─── START SERVER & BACKGROUND SERVICES ───────────────────────────────────────
-
-app.listen(PORT, () => {
-  console.log(`\n================================================================`);
-  console.log(`🏨 Travel Agency Hotel Rate Sheet Manager running at http://localhost:${PORT}`);
-  console.log(`================================================================\n`);
-
-  // Pre-initialize WhatsApp client so incoming rate sheets forward immediately
-  const adminPhone = process.env.ADMIN_WHATSAPP_NUMBER;
-  if (adminPhone) {
-    console.log(`📱 Pre-connecting WhatsApp for automatic delivery to ${adminPhone}...`);
-    initWhatsApp().catch((err) => console.warn(`⚠ WhatsApp pre-init warning: ${err.message}`));
-  }
-
-  // Initial startup inbox scan after 5 seconds
-  setTimeout(async () => {
+if (!process.env.VERCEL) {
+  const AUTO_SYNC_INTERVAL_MS = 2 * 60 * 1000;
+  setInterval(async () => {
     const user = process.env.IMAP_USER || process.env.SMTP_USER || process.env.EMAIL_USER;
     if (user) {
-      console.log('📬 Initial startup inbox check for newly arrived rate sheets...');
+      console.log('⏰ Auto-polling inbox for newly replied rate sheets...');
       await syncRateSheetsFromInbox().catch(() => {});
     }
-  }, 5000);
-});
+  }, AUTO_SYNC_INTERVAL_MS);
+
+  // ─── START SERVER & BACKGROUND SERVICES ───────────────────────────────────────
+  app.listen(PORT, () => {
+    console.log(`\n================================================================`);
+    console.log(`🏨 Travel Agency Hotel Rate Sheet Manager running at http://localhost:${PORT}`);
+    console.log(`================================================================\n`);
+
+    // Pre-initialize WhatsApp client so incoming rate sheets forward immediately
+    const adminPhone = process.env.ADMIN_WHATSAPP_NUMBER;
+    if (adminPhone) {
+      console.log(`📱 Pre-connecting WhatsApp for automatic delivery to ${adminPhone}...`);
+      initWhatsApp().catch((err) => console.warn(`⚠ WhatsApp pre-init warning: ${err.message}`));
+    }
+
+    // Initial startup inbox scan after 5 seconds
+    setTimeout(async () => {
+      const user = process.env.IMAP_USER || process.env.SMTP_USER || process.env.EMAIL_USER;
+      if (user) {
+        console.log('📬 Initial startup inbox check for newly arrived rate sheets...');
+        await syncRateSheetsFromInbox().catch(() => {});
+      }
+    }, 5000);
+
+    // Autonomous Continuous Island-Wide Rate Hunter (Target: ~100 hotels/hour non-stop)
+    setTimeout(() => {
+      console.log('\n🚀 Starting Continuous Autonomous Island-Wide Rate Hunter (100 hotels/hr target)...');
+      runContinuousHarvester().catch((err) => console.error('Continuous worker error:', err));
+    }, 10000);
+  });
+}
+
+export default app;

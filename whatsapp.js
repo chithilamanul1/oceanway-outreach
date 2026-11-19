@@ -45,11 +45,29 @@ export async function requestWhatsAppPairingCode(phone) {
 }
 
 /**
- * Format a Sri Lankan phone number for WhatsApp chat ID
+ * Format a phone number for WhatsApp chat ID
  */
 export function formatPhoneForWhatsApp(phone) {
   const cleaned = cleanPhoneNumber(phone);
   return cleaned ? cleaned + "@c.us" : null;
+}
+
+/**
+ * Get all configured admin delivery WhatsApp numbers
+ * Supports both Sri Lanka (+94) and International (e.g. Saudi Arabia +966) numbers
+ */
+export function getAdminWhatsAppNumbers() {
+  const primary = process.env.ADMIN_WHATSAPP_NUMBER || "94711770186";
+  const secondary = process.env.SECONDARY_WHATSAPP_NUMBER || "966537813155";
+  const extra = process.env.EXTRA_WHATSAPP_NUMBERS || "";
+
+  const rawList = `${primary},${secondary},${extra}`.split(",");
+  const valid = new Set();
+  for (const raw of rawList) {
+    const cleaned = cleanPhoneNumber(raw.trim());
+    if (cleaned) valid.add(cleaned);
+  }
+  return [...valid];
 }
 
 /**
@@ -226,23 +244,17 @@ export async function initWhatsApp() {
 }
 
 /**
- * Forward a downloaded rate sheet attachment directly to user's WhatsApp
+ * Forward a downloaded rate sheet attachment directly to all configured admin WhatsApp numbers
  */
 export async function forwardRateSheetToWhatsApp(filePath, hotelName, starCategory = "Hotel") {
-  const adminPhone = process.env.ADMIN_WHATSAPP_NUMBER;
-  if (!adminPhone) {
-    console.warn("  ⚠ ADMIN_WHATSAPP_NUMBER not set in .env — skipping WhatsApp forward.");
+  const targetNumbers = getAdminWhatsAppNumbers();
+  if (targetNumbers.length === 0) {
+    console.warn("  ⚠ No admin WhatsApp numbers configured in .env.");
     return false;
   }
 
   if (!existsSync(filePath)) {
     console.warn(`  ⚠ Cannot send to WhatsApp: file does not exist at ${filePath}`);
-    return false;
-  }
-
-  const chatId = formatPhoneForWhatsApp(adminPhone);
-  if (!chatId) {
-    console.warn("  ⚠ Invalid ADMIN_WHATSAPP_NUMBER in .env");
     return false;
   }
 
@@ -259,21 +271,57 @@ export async function forwardRateSheetToWhatsApp(filePath, hotelName, starCatego
 
     const fileName = filePath.split(/[\\/]/).pop();
     const media = MessageMedia.fromFilePath(filePath);
-
     const caption = `🏨 *NEW RATE SHEET RECEIVED!*\n\n*Hotel:* ${hotelName}\n*Category:* ${starCategory}\n*File:* ${fileName}\n\n📁 *Saved locally in:* \`${filePath}\`\nReady for travel package costing! 📊`;
 
-    console.log(`  📲 Forwarding "${fileName}" to WhatsApp (${adminPhone})...`);
-    try {
-      await waClient.sendMessage(chatId, media, { caption, sendMediaAsDocument: true });
-      console.log(`  ✅ Successfully sent rate sheet directly to WhatsApp!`);
-      return true;
-    } catch (mediaErr) {
-      console.warn(`  ⚠ Media attachment send failed (${mediaErr.message}). Sending text notification fallback...`);
-      await waClient.sendMessage(chatId, caption).catch(() => {});
-      return false;
+    let sentAny = false;
+    for (const phone of targetNumbers) {
+      const chatId = formatPhoneForWhatsApp(phone);
+      if (!chatId) continue;
+
+      console.log(`  📲 Forwarding "${fileName}" to WhatsApp (+${phone})...`);
+      try {
+        await waClient.sendMessage(chatId, media, { caption, sendMediaAsDocument: true });
+        console.log(`  ✅ Successfully sent rate sheet directly to WhatsApp (+${phone})!`);
+        sentAny = true;
+      } catch (mediaErr) {
+        console.warn(`  ⚠ Media attachment send failed for +${phone} (${mediaErr.message}). Sending text notification fallback...`);
+        await waClient.sendMessage(chatId, caption).catch(() => {});
+      }
     }
+
+    return sentAny;
   } catch (err) {
     console.warn(`  ⚠ Failed to forward rate sheet to WhatsApp: ${err.message}`);
+    return false;
+  }
+}
+
+/**
+ * Send a notification message to all configured admin WhatsApp numbers
+ */
+export async function sendWhatsAppNotificationToAll(message) {
+  const targetNumbers = getAdminWhatsAppNumbers();
+  if (targetNumbers.length === 0) return false;
+
+  try {
+    if (!isReady || !waClient) {
+      await initWhatsApp();
+    }
+    if (!waClient || !isReady) return false;
+
+    let sentCount = 0;
+    for (const phone of targetNumbers) {
+      const chatId = formatPhoneForWhatsApp(phone);
+      if (!chatId) continue;
+      try {
+        await waClient.sendMessage(chatId, message);
+        sentCount++;
+      } catch (err) {
+        console.warn(`  ⚠ Failed sending WhatsApp notification to +${phone}: ${err.message}`);
+      }
+    }
+    return sentCount > 0;
+  } catch {
     return false;
   }
 }

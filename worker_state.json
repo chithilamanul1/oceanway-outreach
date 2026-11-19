@@ -1,10 +1,10 @@
 {
   "startedAt": "2026-11-18T16:55:29.553Z",
-  "cycleCount": 37,
-  "totalInquiriesSent": 57,
-  "totalHotelsDiscovered": 132,
-  "currentRegionIndex": 1,
-  "lastActiveAt": "2026-11-19T16:39:29.854Z",
+  "cycleCount": 38,
+  "totalInquiriesSent": 59,
+  "totalHotelsDiscovered": 163,
+  "currentRegionIndex": 10,
+  "lastActiveAt": "2026-11-19T16:50:14.695Z",
   "isRunning": true,
-  "currentRegionName": "Dambulla"
+  "currentRegionName": "Ella"
 }

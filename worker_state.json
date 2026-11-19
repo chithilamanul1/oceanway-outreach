@@ -1,10 +1,10 @@
 {
-  "startedAt": "2026-11-14T08:34:01.348Z",
-  "cycleCount": 2,
-  "totalInquiriesSent": 20,
-  "totalHotelsDiscovered": 40,
-  "currentRegionIndex": 2,
-  "lastActiveAt": "2026-11-14T08:51:26.254Z",
+  "startedAt": "2026-11-18T16:55:29.553Z",
+  "cycleCount": 34,
+  "totalInquiriesSent": 36,
+  "totalHotelsDiscovered": 56,
+  "currentRegionIndex": 1,
+  "lastActiveAt": "2026-11-19T15:47:33.055Z",
   "isRunning": true,
-  "currentRegionName": "Kandalama"
+  "currentRegionName": "Dambulla"
 }

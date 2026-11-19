@@ -16,7 +16,7 @@
 import { readFileSync, writeFileSync, existsSync } from "node:fs";
 import { setTimeout as sleep } from "node:timers/promises";
 import { scrapeHotelEmails } from "./email_scraper.js";
-import { sendRateSheetInquiry } from "./email.js";
+import { sendRateSheetInquiry, verifyDomainMX } from "./email.js";
 import { notifyHotelDiscovered, notifyInquirySent } from "./discord_notifier.js";
 
 // ─── 65+ GRANULAR TOURIST DESTINATIONS ACROSS ALL OF SRI LANKA ───────────────
@@ -388,6 +388,16 @@ export async function runContinuousHarvester() {
             allEmails = [primaryEmail];
           } else {
             console.log(`✗ not found`);
+          }
+        }
+
+        // 3. Pre-validate email domain MX records to prevent bounces
+        if (primaryEmail) {
+          const mxCheck = await verifyDomainMX(primaryEmail);
+          if (!mxCheck.valid) {
+            console.log(`      🚫 Rejecting unverifiable email domain ${primaryEmail} (${mxCheck.reason}). Skipping to prevent bounces.`);
+            primaryEmail = null;
+            allEmails = [];
           }
         }
 

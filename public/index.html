@@ -172,6 +172,89 @@
       </div>
     </div>
 
+    <!-- CLIENT ITINERARY SPECIFIC B2B INQUIRY CARD -->
+    <div class="bg-white rounded-2xl shadow-sm border border-blue-200 p-6 relative overflow-hidden">
+      <div class="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-blue-600 via-indigo-600 to-emerald-500"></div>
+      
+      <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-4 border-b border-slate-100">
+        <div>
+          <div class="flex items-center gap-2">
+            <span class="bg-blue-100 text-blue-800 text-xs font-bold px-2.5 py-0.5 rounded-full uppercase tracking-wider">
+              Priority Client Booking Request
+            </span>
+            <span class="text-xs text-slate-500">• Rene Travel & Tourism (Jordan)</span>
+          </div>
+          <h2 class="text-lg font-bold text-slate-900 mt-1">Confirmed FIT Itinerary Procurement (2 Adults + 1 Child, 4 yrs)</h2>
+          <p class="text-xs text-slate-600">
+            Requesting B2B confidential net rates, room availability, and child supplements with official Business Registration (PV 00380121) attached.
+          </p>
+        </div>
+
+        <div>
+          <button id="btn-dispatch-client-inquiries" onclick="dispatchClientInquiries()" class="bg-blue-600 hover:bg-blue-700 text-white font-semibold text-xs px-4 py-2.5 rounded-xl shadow-md transition flex items-center gap-2">
+            <i class="fa-solid fa-paper-plane"></i> <span>Send Inquiries to Cinnamon, Palm, Jetwing & Heritance</span>
+          </button>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
+        <!-- 1. Habarana -->
+        <div class="bg-slate-50 border border-slate-200 rounded-xl p-4 space-y-2">
+          <div class="flex justify-between items-start">
+            <div>
+              <span class="text-[10px] font-bold uppercase tracking-wider text-blue-600 block">1. Habarana (11–13 Dec • 2 Nights)</span>
+              <h4 class="font-bold text-slate-900 text-sm">Cinnamon Lodge & Habarana Village</h4>
+            </div>
+            <span id="badge-client-inq-cinnamon" class="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-slate-200 text-slate-700">Ready</span>
+          </div>
+          <p class="text-[11px] text-slate-500 font-mono">
+            bookings@cinnamonhotels.com<br>
+            reachus@cinnamonhotels.com<br>
+            reservations@johnkeellshotels.com
+          </p>
+          <div class="text-[11px] text-slate-600 pt-1 border-t border-slate-200">
+            <b>Req:</b> 1 Double/Twin • BB, HB & FB • Child (4 yrs)
+          </div>
+        </div>
+
+        <!-- 2. Ahangama -->
+        <div class="bg-slate-50 border border-slate-200 rounded-xl p-4 space-y-2">
+          <div class="flex justify-between items-start">
+            <div>
+              <span class="text-[10px] font-bold uppercase tracking-wider text-emerald-600 block">2. Ahangama (15–17 Dec • 2 Nights)</span>
+              <h4 class="font-bold text-slate-900 text-sm">PALM Hotel Sri Lanka</h4>
+            </div>
+            <span id="badge-client-inq-palm" class="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-slate-200 text-slate-700">Ready</span>
+          </div>
+          <p class="text-[11px] text-slate-500 font-mono">
+            info@palmhotelsrilanka.com<br>
+            miriam@palmhotelsrilanka.com
+          </p>
+          <div class="text-[11px] text-slate-600 pt-1 border-t border-slate-200">
+            <b>Req:</b> 1 Suite/Pavilion • BB & HB • Child (4 yrs)
+          </div>
+        </div>
+
+        <!-- 3. Negombo -->
+        <div class="bg-slate-50 border border-slate-200 rounded-xl p-4 space-y-2">
+          <div class="flex justify-between items-start">
+            <div>
+              <span class="text-[10px] font-bold uppercase tracking-wider text-purple-600 block">3. Negombo (17–18 Dec • 1 Night)</span>
+              <h4 class="font-bold text-slate-900 text-sm">Jetwing Blue/Beach & Heritance</h4>
+            </div>
+            <span id="badge-client-inq-negombo" class="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-slate-200 text-slate-700">Ready</span>
+          </div>
+          <p class="text-[11px] text-slate-500 font-mono">
+            reservations@jetwinghotels.com<br>
+            hninfo@heritancehotels.com (Heritance)
+          </p>
+          <div class="text-[11px] text-slate-600 pt-1 border-t border-slate-200">
+            <b>Req:</b> 1 Deluxe Room • BB & HB • 2 Adults + 1 Child
+          </div>
+        </div>
+      </div>
+    </div>
+
     <!-- STATS OVERVIEW CARDS -->
     <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
       <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-200 flex items-center justify-between">
@@ -988,13 +1071,64 @@
       }
     }
 
+    // ─── CLIENT ITINERARY INQUIRIES ──────────────────────────────────────────
+    async function loadClientInquiriesStatus() {
+      try {
+        const res = await fetch('/api/inquiries/client-hotels/status');
+        if (!res.ok) return;
+        const data = await res.json();
+        const logs = data.logs || [];
+
+        const updateBadge = (id, badgeId) => {
+          const sent = logs.find(l => l.id === id && l.success);
+          const el = document.getElementById(badgeId);
+          if (el) {
+            if (sent) {
+              el.className = 'text-[10px] font-semibold px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800';
+              el.innerText = 'Sent ✓ (BR Attached)';
+            } else {
+              el.className = 'text-[10px] font-semibold px-2 py-0.5 rounded-full bg-slate-200 text-slate-700';
+              el.innerText = 'Ready to Send';
+            }
+          }
+        };
+
+        updateBadge('inq_cinnamon_habarana', 'badge-client-inq-cinnamon');
+        updateBadge('inq_palm_ahangama', 'badge-client-inq-palm');
+        updateBadge('inq_jetwing_negombo', 'badge-client-inq-negombo');
+      } catch (err) {
+        console.warn('Failed to load client inquiries status:', err);
+      }
+    }
+
+    async function dispatchClientInquiries() {
+      const btn = document.getElementById('btn-dispatch-client-inquiries');
+      const original = btn.innerHTML;
+      btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Dispatching inquiries to Cinnamon, Palm, Jetwing & Heritance...';
+      btn.disabled = true;
+
+      try {
+        const res = await fetch('/api/inquiries/client-hotels/dispatch', { method: 'POST' });
+        const data = await res.json();
+        alert('Priority Inquiries Dispatched!\nEmails are being sent via Hostinger SMTP with official Business Registration (PV 00380121) attached.');
+        setTimeout(loadClientInquiriesStatus, 3000);
+      } catch (err) {
+        alert('Dispatch error: ' + err.message);
+      } finally {
+        btn.innerHTML = original;
+        btn.disabled = false;
+      }
+    }
+
     // Initial load & periodic polling
     loadData();
     pollWorkerState();
     loadWhatsAppStatus();
+    loadClientInquiriesStatus();
     setInterval(loadData, 20000);
     setInterval(pollWorkerState, 3000);
     setInterval(loadWhatsAppStatus, 8000);
+    setInterval(loadClientInquiriesStatus, 10000);
   </script>
 </body>
 </html>

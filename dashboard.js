@@ -16,6 +16,7 @@ import {
   isContinuousHarvesterRunning,
   EXPANDED_SRI_LANKA_REGIONS
 } from './islandwide_continuous_worker.js';
+import { dispatchAllClientInquiries, loadInquiriesLog, CLIENT_HOTEL_INQUIRIES } from './send_client_hotel_inquiries.js';
 import { setTimeout as sleep } from 'node:timers/promises';
 
 // Auto-load .env if running standalone outside Docker/Vercel
@@ -211,6 +212,25 @@ app.get('/api/business-registration/download', (req, res) => {
     res.download(filePath, 'Oceanway_Tours_Business_Registration_PV00380121.pdf');
   } else {
     res.status(404).json({ error: 'Business Registration certificate not found.' });
+  }
+});
+
+// ─── API: CLIENT ITINERARY SPECIFIC HOTEL INQUIRIES ─────────────────────────
+app.get('/api/inquiries/client-hotels/status', (req, res) => {
+  try {
+    const logs = loadInquiriesLog();
+    res.json({ inquiries: CLIENT_HOTEL_INQUIRIES, logs });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.post('/api/inquiries/client-hotels/dispatch', async (req, res) => {
+  try {
+    res.json({ success: true, message: 'Client hotel inquiries dispatch initiated in background.' });
+    dispatchAllClientInquiries().catch(console.error);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
   }
 });
 

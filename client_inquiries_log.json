@@ -1,0 +1,60 @@
+[
+  {
+    "id": "inq_cinnamon_habarana",
+    "hotelName": "Cinnamon Lodge Habarana & Habarana Village by Cinnamon",
+    "destination": "Habarana",
+    "emails": [
+      "bookings@cinnamonhotels.com",
+      "reachus@cinnamonhotels.com",
+      "reservations@johnkeellshotels.com"
+    ],
+    "dates": "11 Dec 2026 to 13 Dec 2026",
+    "sentAt": "2026-11-19T15:44:35.899Z",
+    "success": true,
+    "messageId": "<a26bad14-ddcc-31f3-afcc-2936fd6f2d67@oceanwaytours.com>",
+    "error": null
+  },
+  {
+    "id": "inq_palm_ahangama",
+    "hotelName": "PALM Hotel Sri Lanka",
+    "destination": "Ahangama",
+    "emails": [
+      "info@palmhotelsrilanka.com",
+      "miriam@palmhotelsrilanka.com"
+    ],
+    "dates": "15 Dec 2026 to 17 Dec 2026",
+    "sentAt": "2026-11-19T15:44:54.098Z",
+    "success": true,
+    "messageId": "<ed7e2872-c086-d81b-da9e-f949d987eeee@oceanwaytours.com>",
+    "error": null
+  },
+  {
+    "id": "inq_jetwing_negombo",
+    "hotelName": "Jetwing Blue & Jetwing Beach",
+    "destination": "Negombo",
+    "emails": [
+      "reservations@jetwinghotels.com",
+      "resv.blue@jetwinghotels.com",
+      "resv.beach@jetwinghotels.com"
+    ],
+    "dates": "17 Dec 2026 to 18 Dec 2026",
+    "sentAt": "2026-11-19T15:45:17.845Z",
+    "success": true,
+    "messageId": "<964f71d9-69e9-acd3-a69a-c1fcd7498bda@oceanwaytours.com>",
+    "error": null
+  },
+  {
+    "id": "inq_heritance_negombo",
+    "hotelName": "Sentido Heritance Negombo",
+    "destination": "Negombo",
+    "emails": [
+      "hninfo@heritancehotels.com",
+      "info@heritancehotels.com"
+    ],
+    "dates": "17 Dec 2026 to 18 Dec 2026",
+    "sentAt": "2026-11-19T15:45:39.913Z",
+    "success": true,
+    "messageId": "<a5dfbd32-f119-e0f7-b35c-a62f1816cfd2@oceanwaytours.com>",
+    "error": null
+  }
+]

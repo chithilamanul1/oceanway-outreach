@@ -205,6 +205,16 @@ app.get('/api/costing-sheet/17pax/download', (req, res) => {
   }
 });
 
+// Download Rene Travel 2A+1C Itinerary Costing Workbook (Habarana, Ahangama, Negombo)
+app.get('/api/costing-sheet/rene-travel/download', (req, res) => {
+  const filePath = resolve(__dirname, 'costing_sheets', 'Rene_Travel_2A1C_SriLanka_Costing.xlsx');
+  if (existsSync(filePath)) {
+    res.download(filePath, 'Rene_Travel_2A1C_SriLanka_Costing.xlsx');
+  } else {
+    res.status(404).json({ error: 'Rene Travel costing workbook not found.' });
+  }
+});
+
 // Download Oceanway Tours Business Registration Certificate (PV 00380121)
 app.get('/api/business-registration/download', (req, res) => {
   const filePath = resolve(__dirname, 'assets', 'Oceanway_Tours_Business_Registration_PV00380121.pdf');
